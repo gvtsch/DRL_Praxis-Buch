@@ -43,7 +43,7 @@ class InputWrapper(gym.ObservationWrapper):
         old_space = self.observation_space
         self.observation_space = gym.spaces.Box(
             self.observation(old_space.low),
-            self.observation(old.space.high),
+            self.observation(old_space.high),
             dtype=np.float32
         )
         
@@ -151,7 +151,7 @@ def iterate_batches(envs, batch_size=BATCH_SIZE):
             # Normierung auf Werte zwischen -1 und 1
             batch_np = np.array(batch, dtype = np.float32)
             batch_np *= 2.0 / 255.0 - 1.0
-            yield torch_tensor(batch_np)
+            yield torch.tensor(batch_np)
             batch.clear()
         if is_done:
             e.reset()
@@ -215,10 +215,10 @@ if __name__ == "__main__":
     for batch_v in iterate_batches(envs):
         # Zusätzliche gefälschte Beispiele erzeugen
         # Eingabe ist 4D: batch, filters, x, y
-        get_input_v = torch.FloatTensor(
-            BATCH_SIZE, LATENT_VECTOR_SIZE, 1, 1
-        )
-        gen_input_v.normal_(0,1).to(device)
+        gen_input_v = torch.FloatTensor(
+            BATCH_SIZE, LATENT_VECTOR_SIZE, 1, 1)
+        gen_input_v.normal_(0, 1)
+        gen_input_v = gen_input_v.to(device)
         batch_v = batch_v.to(device)
         gen_output_v = net_gener(gen_input_v)
         
@@ -227,10 +227,10 @@ if __name__ == "__main__":
         dis_output_true_v = net_discr(batch_v)
         dis_output_fake_v = net_discr(gen_output_v.detach())
         dis_loss = objective(dis_output_true_v, true_labels_v) + \
-                    objective(dis_output_fake_v, fake_labels_v)
+                   objective(dis_output_fake_v, fake_labels_v)
         dis_loss.backward()
         dis_optimizer.step()
-        dis_loss.append(dis_loss.item())
+        dis_losses.append(dis_loss.item())
         
         # train generator
         gen_optimizer.zero_grad()
