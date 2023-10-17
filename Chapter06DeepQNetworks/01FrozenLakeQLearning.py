@@ -17,7 +17,7 @@ class Agent():
         action = self.env.action_space.sample()
         old_state = self.state
         new_state, reward, is_done, _ = self.env.step(action)
-        self.state = self.env.reset() if is_done else new_state
+        self.state = self.env.reset() if is_done else new_state 
         return old_state, action, reward, new_state
     
     def best_value_and_action(self, state):
